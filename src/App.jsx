@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { CarritoProvider } from './contexto/CarritoContexto'
 import Navbar from './componentes/Navbar'
 import Productos from './paginas/tienda/Productos'
+import DetalleProducto from './paginas/tienda/DetalleProducto'
 import Carrito from './paginas/tienda/Carrito'
 import Checkout from './paginas/tienda/Checkout'
 import PagoExitoso from './paginas/tienda/PagoExitoso'
@@ -21,8 +22,9 @@ function App() {
             </div>
           } />
 
-          {/* Rutas de la Tienda */}
+          {/* Rutas de la Tienda*/}
           <Route path="/productos" element={<Productos />} />
+          <Route path="/producto/:id" element={<DetalleProducto />} />
           <Route path="/carrito" element={<Carrito />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/pago-exitoso" element={<PagoExitoso />} />
