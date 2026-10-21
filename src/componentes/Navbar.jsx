@@ -1,7 +1,9 @@
-
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom';
+import { useCarrito } from '../contexto/CarritoContexto';
 
 function Navbar() {
+  const { cantidadTotal, total } = useCarrito();
+
   return (
     <nav className="navbar navbar-expand-lg bg-light border-bottom">
       <div className="container">
@@ -31,12 +33,14 @@ function Navbar() {
           <div className="d-flex gap-2">
             <NavLink className="btn btn-outline-primary btn-sm" to="/login">Iniciar sesión</NavLink>
             <NavLink className="btn btn-primary btn-sm" to="/registro">Crear cuenta</NavLink>
-            <NavLink className="btn btn-success btn-sm" to="/carrito">Carrito $0</NavLink>
+            <NavLink className="btn btn-success btn-sm" to="/carrito">
+              Carrito ({cantidadTotal}) - ${total.toLocaleString("es-CL")}
+            </NavLink>
           </div>
         </div>
       </div>
     </nav>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;
