@@ -1,6 +1,8 @@
+
 import { Routes, Route } from 'react-router-dom'
 import { CarritoProvider } from './contexto/CarritoContexto'
 import Navbar from './componentes/Navbar'
+import Footer from './componentes/Footer'
 import Productos from './paginas/tienda/Productos'
 import DetalleProducto from './paginas/tienda/DetalleProducto'
 import Carrito from './paginas/tienda/Carrito'
@@ -11,26 +13,29 @@ import PagoError from './paginas/tienda/PagoError'
 function App() {
   return (
     <CarritoProvider>
-      <Navbar />
-      <main className="container my-4">
-        <Routes>
-          {/* Ruta Principal / Inicio */}
-          <Route path="/" element={
-            <div className="text-center py-5">
-              <h1 className="display-4 fw-bold text-success">Delicias del Sur</h1>
-              <p className="lead">Bienvenido a nuestra tienda de productos artesanales.</p>
-            </div>
-          } />
+      <div className="d-flex flex-column min-vh-100">
+        <Navbar />
+        <main className="container my-4 flex-grow-1">
+          <Routes>
+            {/* Ruta Principal / Inicio */}
+            <Route path="/" element={
+              <div className="text-center py-5">
+                <h1 className="display-4 fw-bold text-success">Delicias del Sur</h1>
+                <p className="lead">Bienvenido a nuestra tienda de productos artesanales.</p>
+              </div>
+            } />
 
-          {/* Rutas de la Tienda*/}
-          <Route path="/productos" element={<Productos />} />
-          <Route path="/producto/:id" element={<DetalleProducto />} />
-          <Route path="/carrito" element={<Carrito />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/pago-exitoso" element={<PagoExitoso />} />
-          <Route path="/pago-error" element={<PagoError />} />
-        </Routes>
-      </main>
+            {/* Rutas de la Tienda*/}
+            <Route path="/productos" element={<Productos />} />
+            <Route path="/producto/:id" element={<DetalleProducto />} />
+            <Route path="/carrito" element={<Carrito />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/pago-exitoso" element={<PagoExitoso />} />
+            <Route path="/pago-error" element={<PagoError />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
     </CarritoProvider>
   )
 }
