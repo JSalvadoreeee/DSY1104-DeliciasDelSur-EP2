@@ -10,6 +10,15 @@ import Carrito from './paginas/tienda/Carrito'
 import Checkout from './paginas/tienda/Checkout'
 import PagoExitoso from './paginas/tienda/PagoExitoso'
 import PagoError from './paginas/tienda/PagoError'
+import Registro from './paginas/tienda/Registro'
+import Login from './paginas/tienda/Login'
+import Nosotros from './paginas/tienda/Nosotros'
+import Contacto from './paginas/tienda/Contacto'
+import Blogs from './paginas/tienda/Blogs'
+import DetalleBlog from './paginas/tienda/DetalleBlog'
+import Categorias from './paginas/tienda/Categorias'
+import Categoria from './paginas/tienda/Categoria'
+import Ofertas from './paginas/tienda/Ofertas'
 
 function App() {
   return (
@@ -32,6 +41,15 @@ function App() {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/pago-exitoso" element={<PagoExitoso />} />
               <Route path="/pago-error" element={<PagoError />} />
+              <Route path="/registro" element={<Registro />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/nosotros" element={<Nosotros />} />
+              <Route path="/contacto" element={<Contacto />} />
+              <Route path="/blogs" element={<Blogs />} />
+              <Route path="/blog/:id" element={<DetalleBlog />} />
+              <Route path="/categorias" element={<Categorias />} />
+              <Route path="/categoria/:nombre" element={<Categoria />} />
+              <Route path="/ofertas" element={<Ofertas />} />
             </Routes>
           </main>
           <Footer />

@@ -6,6 +6,7 @@ let productos = [
     codigo: "PR001",
     nombre: "Mermelada de Frutilla", 
     precio: 2500, 
+    precioOferta: 2000,
     categoria: "Conservas", 
     vidaUtil: "365 días",
     imagen: "https://osojimix.com/wp-content/uploads/2021/04/MERMELADA-DE-FRUTILLAS.jpg" 
@@ -24,6 +25,7 @@ let productos = [
     codigo: "PR003",
     nombre: "Salsa de Tomate", 
     precio: 1800, 
+    precioOferta: 1500,
     categoria: "Salsas", 
     vidaUtil: "180 días",
     imagen: "https://www.aceitesdeolivadeespana.com/wp-content/uploads/2021/05/Salsa-de-tomate-casera.jpg" 
@@ -51,6 +53,7 @@ let productos = [
     codigo: "PR006",
     nombre: "Manzana Deshidratada", 
     precio: 3500, 
+    precioOferta: 2900,
     categoria: "Deshidratados", 
     vidaUtil: "180 días",
     imagen: "https://deshidratadordealimentos.cl/wp-content/uploads/2020/05/manzanas-1024x683.jpg" 
@@ -66,3 +69,18 @@ export const agregarProducto = (nuevoProducto) => {
   productos.push(nuevoProducto);
   return nuevoProducto;
 };
+
+export const actualizarProducto = (id, cambios) => {
+  const indice = productos.findIndex(p => p.id === parseInt(id));
+  if (indice === -1) throw new Error('Producto no encontrado');
+  productos[indice] = { ...productos[indice], ...cambios };
+  return productos[indice];
+};
+
+export const eliminarProducto = (id) => {
+  productos = productos.filter(p => p.id !== parseInt(id));
+};
+
+export const obtenerCategorias = () => [...new Set(productos.map(p => p.categoria))];
+
+export const obtenerOfertas = () => productos.filter(p => p.precioOferta);
