@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../../contexto/SesionContexto'
@@ -7,6 +6,7 @@ import {
   validarNombre,
   validarCorreo,
   validarPassword,
+  esNombreCiudad,
 } from '../../utilidades/validaciones'
 
 function Registro() {
@@ -30,10 +30,18 @@ function Registro() {
   const validar = () => {
     const nuevos = {}
     if (!validarRun(form.run)) nuevos.run = 'RUN inválido (ej: 12345678-5)'
-    if (!validarNombre(form.nombre)) nuevos.nombre = 'Ingresa tu nombre'
+    
+    // Validación de nombre y bloqueo de ciudades
+    if (!validarNombre(form.nombre)) {
+      nuevos.nombre = 'Ingresa tu nombre'
+    } else if (esNombreCiudad(form.nombre)) {
+      nuevos.nombre = 'El nombre de usuario no puede coincidir con el nombre de una ciudad'
+    }
+
     if (!validarCorreo(form.correo)) nuevos.correo = 'Correo inválido'
     if (!validarPassword(form.password)) nuevos.password = 'Mínimo 8 caracteres'
     if (form.password !== form.confirmar) nuevos.confirmar = 'Las contraseñas no coinciden'
+    
     return nuevos
   }
 

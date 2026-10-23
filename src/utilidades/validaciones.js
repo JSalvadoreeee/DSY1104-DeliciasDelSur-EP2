@@ -29,3 +29,36 @@ export function validarPassword(password) {
 export function validarNombre(nombre) {
   return typeof nombre === 'string' && nombre.trim().length >= 2
 }
+
+// Lista de ciudades de Chile y metrópolis del mundo (en minúsculas)
+const ciudadesMundo = new Set([
+  // Chile
+  'valparaíso', 'valparaiso', 'viña del mar', 'vina del mar', 'concepción', 'concepcion',
+  'la serena', 'coquimbo', 'antofagasta', 'temuco', 'rancagua', 'talca', 'arica', 'iquique',
+  'puerto montt', 'chillán', 'chillan', 'valdivia', 'osorno', 'copiapó', 'copiapo', 'curicó',
+  'curico', 'punta arenas', 'calama', 'san fernando', 'quillota', 'san bernardo', 'puente alto',
+  'linares', 'los ángeles', 'los angeles', 'melipilla', 'ovalle', 'vallenar', 'coyhaique',
+  // América y Mundo
+  'buenos aires', 'lima', 'bogota', 'bogotá', 'quito', 'caracas', 'montevideo', 'asuncion',
+  'la paz', 'brasilia', 'rio de janeiro', 'sao paulo', 'mexico', 'méxico', 'miami',
+  'new york', 'nueva york', 'los angeles', 'chicago', 'toronto', 'vancouver',
+  'madrid', 'barcelona', 'paris', 'parís', 'londres', 'roma', 'berlin', 'lisboa',
+  'tokio', 'tokyo', 'seul', 'sidney', 'dubai'
+]);
+
+export const esNombreCiudad = (nombre) => {
+  if (!nombre) return false;
+  
+  const nombreLimpio = nombre.trim().toLowerCase();
+  const palabras = nombreLimpio.split(/\s+/); // Separa el texto por espacios
+
+  // Si el usuario ingresó 2 o más palabras (ej: "Santiago Pérez" o "María La Serena"),
+  // se asume que es un nombre completo legítimo y SE PERMITE.
+  if (palabras.length > 1) {
+    // Excepción: Solo bloquea si las 2 palabras juntas forman una ciudad de dos palabras (ej: "Punta Arenas" o "Buenos Aires")
+    return ciudadesMundo.has(nombreLimpio);
+  }
+
+  // Si es solo 1 palabra (ej: "Santiago", "Arica", "Madrid"), se bloquea si coincide con una ciudad.
+  return ciudadesMundo.has(nombreLimpio);
+};
