@@ -1,10 +1,11 @@
-
+// App principal: rutas de la tienda y del panel admin con sesión y carrito
 import { Routes, Route } from 'react-router-dom'
 import { SesionProvider } from './contexto/SesionContexto'
 import { CarritoProvider } from './contexto/CarritoContexto'
 import Navbar from './componentes/Navbar'
 import Footer from './componentes/Footer'
 import RutaAdmin from './componentes/RutaAdmin'
+import Home from './paginas/tienda/Home'
 import Productos from './paginas/tienda/Productos'
 import DetalleProducto from './paginas/tienda/DetalleProducto'
 import Carrito from './paginas/tienda/Carrito'
@@ -39,12 +40,7 @@ function App() {
           <Navbar />
           <main className="container my-4 flex-grow-1">
             <Routes>
-              <Route path="/" element={
-                <div className="text-center py-5">
-                  <h1 className="display-4 fw-bold text-success">Delicias del Sur</h1>
-                  <p className="lead">Bienvenido a nuestra tienda de productos artesanales.</p>
-                </div>
-              } />
+              <Route path="/" element={<Home />} />
 
               <Route path="/productos" element={<Productos />} />
               <Route path="/producto/:id" element={<DetalleProducto />} />
