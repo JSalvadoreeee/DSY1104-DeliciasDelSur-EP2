@@ -1,9 +1,10 @@
-// App principal: rutas de la tienda con sesión, carrito, Navbar y Footer
+
 import { Routes, Route } from 'react-router-dom'
 import { SesionProvider } from './contexto/SesionContexto'
 import { CarritoProvider } from './contexto/CarritoContexto'
 import Navbar from './componentes/Navbar'
 import Footer from './componentes/Footer'
+import RutaAdmin from './componentes/RutaAdmin'
 import Productos from './paginas/tienda/Productos'
 import DetalleProducto from './paginas/tienda/DetalleProducto'
 import Carrito from './paginas/tienda/Carrito'
@@ -19,6 +20,16 @@ import DetalleBlog from './paginas/tienda/DetalleBlog'
 import Categorias from './paginas/tienda/Categorias'
 import Categoria from './paginas/tienda/Categoria'
 import Ofertas from './paginas/tienda/Ofertas'
+import AdminLayout from './paginas/admin/AdminLayout'
+import Dashboard from './paginas/admin/Dashboard'
+import AdminProductos from './paginas/admin/AdminProductos'
+import AdminProductoForm from './paginas/admin/AdminProductoForm'
+import AdminLotes from './paginas/admin/AdminLotes'
+import AdminLoteForm from './paginas/admin/AdminLoteForm'
+import AdminUsuarios from './paginas/admin/AdminUsuarios'
+import AdminUsuarioForm from './paginas/admin/AdminUsuarioForm'
+import AdminReportes from './paginas/admin/AdminReportes'
+import AdminPerfil from './paginas/admin/AdminPerfil'
 
 function App() {
   return (
@@ -50,6 +61,21 @@ function App() {
               <Route path="/categorias" element={<Categorias />} />
               <Route path="/categoria/:nombre" element={<Categoria />} />
               <Route path="/ofertas" element={<Ofertas />} />
+
+              <Route path="/admin" element={<RutaAdmin><AdminLayout /></RutaAdmin>}>
+                <Route index element={<Dashboard />} />
+                <Route path="productos" element={<AdminProductos />} />
+                <Route path="productos/nuevo" element={<AdminProductoForm />} />
+                <Route path="productos/editar/:id" element={<AdminProductoForm />} />
+                <Route path="lotes" element={<AdminLotes />} />
+                <Route path="lotes/nuevo" element={<AdminLoteForm />} />
+                <Route path="lotes/editar/:id" element={<AdminLoteForm />} />
+                <Route path="usuarios" element={<AdminUsuarios />} />
+                <Route path="usuarios/nuevo" element={<AdminUsuarioForm />} />
+                <Route path="usuarios/editar/:id" element={<AdminUsuarioForm />} />
+                <Route path="reportes" element={<AdminReportes />} />
+                <Route path="perfil" element={<AdminPerfil />} />
+              </Route>
             </Routes>
           </main>
           <Footer />

@@ -1,6 +1,6 @@
 // Sesión global: guarda solo los datos públicos del usuario y los mantiene al recargar
 import { createContext, useContext, useState } from 'react'
-import { autenticar, crearUsuario } from '../datos/usuariosdb'
+import { autenticar, crearUsuario, actualizarUsuario } from '../datos/usuariosdb'
 
 const SesionContexto = createContext(null)
 const CLAVE = 'dds_sesion'
@@ -45,13 +45,21 @@ export function SesionProvider({ children }) {
     return nuevo
   }
 
+  const actualizarPerfil = (cambios) => {
+    const actualizado = actualizarUsuario(usuario.id, cambios)
+    abrirSesion(actualizado)
+    return actualizado
+  }
+
   const cerrarSesion = () => {
     localStorage.removeItem(CLAVE)
     setUsuario(null)
   }
 
   return (
-    <SesionContexto.Provider value={{ usuario, iniciarSesion, registrar, cerrarSesion }}>
+    <SesionContexto.Provider
+      value={{ usuario, iniciarSesion, registrar, actualizarPerfil, cerrarSesion }}
+    >
       {children}
     </SesionContexto.Provider>
   )
