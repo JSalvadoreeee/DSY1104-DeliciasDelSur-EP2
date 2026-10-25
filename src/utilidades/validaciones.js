@@ -30,7 +30,7 @@ export function validarNombre(nombre) {
   return typeof nombre === 'string' && nombre.trim().length >= 2
 }
 
-// Lista de ciudades de Chile y metrópolis del mundo
+// Lista de ciudades de Chile y metrópolis del mundo (en minúsculas)
 const ciudadesMundo = new Set([
   // Chile
   'valparaíso', 'valparaiso', 'viña del mar', 'vina del mar', 'concepción', 'concepcion',
