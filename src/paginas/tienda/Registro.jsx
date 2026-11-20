@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../../contexto/SesionContexto'
 import {
-  validarRun,
   validarNombre,
   validarCorreo,
   validarPassword,
@@ -14,7 +13,6 @@ function Registro() {
   const navigate = useNavigate()
 
   const [form, setForm] = useState({
-    run: '',
     nombre: '',
     correo: '',
     password: '',
@@ -22,6 +20,7 @@ function Registro() {
   })
   const [errores, setErrores] = useState({})
   const [errorGeneral, setErrorGeneral] = useState('')
+  const [cargando, setCargando] = useState(false)
 
   const cambiar = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -29,9 +28,7 @@ function Registro() {
 
   const validar = () => {
     const nuevos = {}
-    if (!validarRun(form.run)) nuevos.run = 'RUN inválido (ej: 12345678-5)'
-    
-    // Validación de nombre y bloqueo de ciudades
+
     if (!validarNombre(form.nombre)) {
       nuevos.nombre = 'Ingresa tu nombre'
     } else if (esNombreCiudad(form.nombre)) {
@@ -41,20 +38,20 @@ function Registro() {
     if (!validarCorreo(form.correo)) nuevos.correo = 'Correo inválido'
     if (!validarPassword(form.password)) nuevos.password = 'Mínimo 8 caracteres'
     if (form.password !== form.confirmar) nuevos.confirmar = 'Las contraseñas no coinciden'
-    
+
     return nuevos
   }
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     setErrorGeneral('')
     const nuevos = validar()
     setErrores(nuevos)
     if (Object.keys(nuevos).length > 0) return
 
+    setCargando(true)
     try {
-      registrar({
-        run: form.run.replace(/[.\-\s]/g, '').toUpperCase(),
+      await registrar({
         nombre: form.nombre.trim(),
         correo: form.correo.trim(),
         password: form.password,
@@ -62,6 +59,8 @@ function Registro() {
       navigate('/')
     } catch (err) {
       setErrorGeneral(err.message)
+    } finally {
+      setCargando(false)
     }
   }
 
@@ -91,13 +90,14 @@ function Registro() {
             {errorGeneral && <div className="alert alert-danger">{errorGeneral}</div>}
 
             <form onSubmit={enviar} noValidate>
-              {campo('run', 'RUN', 'text', '12345678-5')}
               {campo('nombre', 'Nombre')}
               {campo('correo', 'Correo', 'email')}
               {campo('password', 'Contraseña', 'password')}
               {campo('confirmar', 'Confirmar contraseña', 'password')}
 
-              <button type="submit" className="btn btn-success w-100">Registrarme</button>
+              <button type="submit" className="btn btn-success w-100" disabled={cargando}>
+                {cargando ? 'Creando cuenta...' : 'Registrarme'}
+              </button>
             </form>
 
             <p className="text-center small mt-3 mb-0">

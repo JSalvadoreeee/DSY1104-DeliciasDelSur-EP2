@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../../contexto/SesionContexto'
@@ -11,12 +10,13 @@ function Login() {
   const [form, setForm] = useState({ correo: '', password: '' })
   const [errores, setErrores] = useState({})
   const [errorGeneral, setErrorGeneral] = useState('')
+  const [cargando, setCargando] = useState(false)
 
   const cambiar = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     setErrorGeneral('')
 
@@ -26,12 +26,15 @@ function Login() {
     setErrores(nuevos)
     if (Object.keys(nuevos).length > 0) return
 
-    const ok = iniciarSesion(form.correo.trim(), form.password)
-    if (!ok) {
-      setErrorGeneral('Correo o contraseña incorrectos')
-      return
+    setCargando(true)
+    try {
+      await iniciarSesion(form.correo.trim(), form.password)
+      navigate('/')
+    } catch (err) {
+      setErrorGeneral(err.message)
+    } finally {
+      setCargando(false)
     }
-    navigate('/')
   }
 
   return (
@@ -70,7 +73,9 @@ function Login() {
                 {errores.password && <div className="invalid-feedback">{errores.password}</div>}
               </div>
 
-              <button type="submit" className="btn btn-success w-100">Entrar</button>
+              <button type="submit" className="btn btn-success w-100" disabled={cargando}>
+                {cargando ? 'Entrando...' : 'Entrar'}
+              </button>
             </form>
 
             <p className="text-center small mt-3 mb-0">
