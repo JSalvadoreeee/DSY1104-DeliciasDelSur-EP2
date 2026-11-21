@@ -1,8 +1,7 @@
-
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Carousel } from 'bootstrap'
-import { obtenerCategorias, obtenerProductos } from '../../datos/productosdb'
+import { useCatalogo } from '../../utilidades/useCatalogo'
 
 const SLIDES = [
   {
@@ -27,8 +26,7 @@ const SLIDES = [
 
 function Home() {
   const carruselRef = useRef(null)
-  const categorias = obtenerCategorias()
-  const productos = obtenerProductos()
+  const { productos, categorias, cargando, error } = useCatalogo()
 
   useEffect(() => {
     const carrusel = new Carousel(carruselRef.current, { interval: 4000, ride: 'carousel' })
@@ -77,22 +75,24 @@ function Home() {
       </div>
 
       <h2 className="text-center mb-4">Categorías</h2>
+      {cargando && <p className="text-center">Cargando categorías...</p>}
+      {error && <div className="alert alert-danger">{error}</div>}
       <div className="row g-3 justify-content-center">
         {categorias.map((cat) => {
-          const deCategoria = productos.filter((p) => p.categoria === cat)
+          const deCategoria = productos.filter((p) => p.categoria === cat.nombre)
           return (
-            <div className="col-12 col-sm-6 col-lg-4" key={cat}>
+            <div className="col-12 col-sm-6 col-lg-4" key={cat.id}>
               <div className="card h-100 text-center shadow-sm">
                 <img
                   src={deCategoria[0]?.imagen}
                   className="card-img-top"
-                  alt={cat}
+                  alt={cat.nombre}
                   style={{ height: '200px', objectFit: 'cover' }}
                 />
                 <div className="card-body">
-                  <h5 className="card-title">{cat}</h5>
+                  <h5 className="card-title">{cat.nombre}</h5>
                   <p className="text-muted">{deCategoria.length} producto(s)</p>
-                  <Link className="btn btn-outline-success btn-sm" to={`/categoria/${cat}`}>
+                  <Link className="btn btn-outline-success btn-sm" to={`/categoria/${cat.nombre}`}>
                     Ver productos
                   </Link>
                 </div>
