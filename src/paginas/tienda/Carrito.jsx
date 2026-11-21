@@ -1,9 +1,9 @@
-// src/paginas/tienda/Carrito.jsx
-import { useCarrito } from "../../contexto/CarritoContexto";
-import { Link } from "react-router-dom";
+// Carrito de compras con precios finales (con oferta) y subtotales
+import { Link } from 'react-router-dom'
+import { useCarrito } from '../../contexto/CarritoContexto'
 
 export default function Carrito() {
-  const { carrito, eliminarDelCarrito, limpiarCarrito, total } = useCarrito();
+  const { carrito, eliminarDelCarrito, limpiarCarrito, total } = useCarrito()
 
   if (carrito.length === 0) {
     return (
@@ -12,7 +12,7 @@ export default function Carrito() {
         <p className="text-muted">Agrega productos desde el catálogo para continuar.</p>
         <Link to="/productos" className="btn btn-danger mt-3">Ver Productos</Link>
       </div>
-    );
+    )
   }
 
   return (
@@ -30,22 +30,32 @@ export default function Carrito() {
             </tr>
           </thead>
           <tbody>
-            {carrito.map((item) => (
-              <tr key={item.id}>
-                <td>{item.nombre} ({item.codigo})</td>
-                <td>${item.precio.toLocaleString("es-CL")}</td>
-                <td>{item.cantidad}</td>
-                <td>${(item.precio * item.cantidad).toLocaleString("es-CL")}</td>
-                <td>
-                  <button 
-                    className="btn btn-outline-danger btn-sm" 
-                    onClick={() => eliminarDelCarrito(item.id)}
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {carrito.map((item) => {
+              const precio = item.precioFinal ?? item.precio
+              return (
+                <tr key={item.id}>
+                  <td>{item.nombre} ({item.codigo})</td>
+                  <td>
+                    {item.precioOferta && (
+                      <span className="text-muted text-decoration-line-through me-2">
+                        ${item.precio.toLocaleString('es-CL')}
+                      </span>
+                    )}
+                    ${precio.toLocaleString('es-CL')}
+                  </td>
+                  <td>{item.cantidad}</td>
+                  <td>${(precio * item.cantidad).toLocaleString('es-CL')}</td>
+                  <td>
+                    <button
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => eliminarDelCarrito(item.id)}
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -53,12 +63,12 @@ export default function Carrito() {
       <div className="d-flex justify-content-between align-items-center mt-4">
         <button className="btn btn-outline-secondary" onClick={limpiarCarrito}>Vaciar Carrito</button>
         <div>
-          <h4>Total: <span className="text-danger fw-bold">${total.toLocaleString("es-CL")} CLP</span></h4>
+          <h4>Total: <span className="text-danger fw-bold">${total.toLocaleString('es-CL')} CLP</span></h4>
           <Link to="/checkout" className="btn btn-warning btn-lg mt-2 fw-semibold w-100">
             Proceder al Pago
           </Link>
         </div>
       </div>
     </div>
-  );
+  )
 }
