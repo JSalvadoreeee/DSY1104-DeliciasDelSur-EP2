@@ -30,6 +30,7 @@ import AdminOrdenes from './paginas/admin/AdminOrdenes'
 import AdminOrdenDetalle from './paginas/admin/AdminOrdenDetalle'
 import AdminLotes from './paginas/admin/AdminLotes'
 import AdminLoteForm from './paginas/admin/AdminLoteForm'
+import AdminCategorias from './paginas/admin/AdminCategorias'
 import AdminUsuarios from './paginas/admin/AdminUsuarios'
 import AdminUsuarioForm from './paginas/admin/AdminUsuarioForm'
 import AdminReportes from './paginas/admin/AdminReportes'
@@ -78,6 +79,7 @@ function App() {
                   <Route path="lotes" element={<AdminLotes />} />
                   <Route path="lotes/nuevo" element={<AdminLoteForm />} />
                   <Route path="lotes/editar/:id" element={<AdminLoteForm />} />
+                  <Route path="categorias" element={<AdminCategorias />} />
                   <Route path="usuarios" element={<AdminUsuarios />} />
                   <Route path="usuarios/nuevo" element={<AdminUsuarioForm />} />
                   <Route path="usuarios/editar/:id" element={<AdminUsuarioForm />} />

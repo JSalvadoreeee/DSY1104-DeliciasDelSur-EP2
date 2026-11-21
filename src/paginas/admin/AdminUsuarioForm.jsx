@@ -1,36 +1,108 @@
-// Formulario para crear o editar un usuario, según si la URL trae un id
-import { useState } from 'react'
+// Formulario para crear o editar un usuario contra la API, según si la URL trae un id
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import {
-  crearUsuario,
-  actualizarUsuario,
-  obtenerUsuarioPorId,
-  obtenerUsuarios,
-} from '../../datos/usuariosdb'
+import { usuariosServicio } from '../../servicios/usuariosServicio'
+import { mensajeError } from '../../servicios/api'
 import { useSesion } from '../../contexto/SesionContexto'
-import {
-  validarRun,
-  validarNombre,
-  validarCorreo,
-  validarPassword,
-} from '../../utilidades/validaciones'
+import { validarNombre, validarCorreo, validarPassword } from '../../utilidades/validaciones'
+
+const VACIO = {
+  nombre: '',
+  correo: '',
+  password: '',
+  rol: 'CLIENTE',
+  direccion: '',
+  telefono: '',
+  estado: true,
+}
+
+function textoError(e) {
+  return e.response ? mensajeError(e, 'No se pudo guardar el usuario') : 'No se pudo conectar con el servidor'
+}
 
 function AdminUsuarioForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { usuario: actual } = useSesion()
-  const existente = id ? obtenerUsuarioPorId(id) : null
-  const esPropio = Boolean(existente) && actual?.id === existente.id
 
-  const [form, setForm] = useState(
-    existente
-      ? { run: existente.run, nombre: existente.nombre, correo: existente.correo, password: '', rol: existente.rol }
-      : { run: '', nombre: '', correo: '', password: '', rol: 'cliente' }
-  )
+  const [form, setForm] = useState(VACIO)
+  const [esPropio, setEsPropio] = useState(false)
   const [errores, setErrores] = useState({})
   const [errorGeneral, setErrorGeneral] = useState('')
+  const [cargando, setCargando] = useState(Boolean(id))
+  const [noExiste, setNoExiste] = useState(false)
+  const [guardando, setGuardando] = useState(false)
 
-  if (id && !existente) {
+  useEffect(() => {
+    if (!id) return
+    usuariosServicio
+      .obtener(id)
+      .then((u) => {
+        setForm({
+          nombre: u.nombre,
+          correo: u.correo,
+          password: '',
+          rol: u.rol,
+          direccion: u.direccion ?? '',
+          telefono: u.telefono ?? '',
+          estado: u.estado,
+        })
+        setEsPropio(actual?.id === u.id)
+      })
+      .catch((e) => {
+        if (e.response?.status === 404) setNoExiste(true)
+        else setErrorGeneral(textoError(e))
+      })
+      .finally(() => setCargando(false))
+  }, [id, actual?.id])
+
+  const cambiar = (e) => {
+    const { name, value, type, checked } = e.target
+    setForm({ ...form, [name]: type === 'checkbox' ? checked : value })
+  }
+
+  const validar = () => {
+    const nuevos = {}
+    if (!validarNombre(form.nombre)) nuevos.nombre = 'Ingresa el nombre'
+    if (!validarCorreo(form.correo)) nuevos.correo = 'Correo inválido'
+    const requierePassword = !id || form.password !== ''
+    if (requierePassword && !validarPassword(form.password)) nuevos.password = 'Mínimo 8 caracteres'
+    return nuevos
+  }
+
+  const enviar = async (e) => {
+    e.preventDefault()
+    setErrorGeneral('')
+    const nuevos = validar()
+    setErrores(nuevos)
+    if (Object.keys(nuevos).length > 0) return
+
+    const datos = {
+      nombre: form.nombre.trim(),
+      correo: form.correo.trim(),
+      rol: form.rol,
+      direccion: form.direccion.trim(),
+      telefono: form.telefono.trim(),
+      estado: form.estado,
+    }
+    if (form.password !== '') datos.password = form.password
+
+    setGuardando(true)
+    try {
+      if (id) await usuariosServicio.actualizar(id, datos)
+      else await usuariosServicio.crear(datos)
+      navigate('/admin/usuarios')
+    } catch (err) {
+      if (err.response?.data?.errores) setErrores(err.response.data.errores)
+      setErrorGeneral(textoError(err))
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  if (cargando) return <p>Cargando...</p>
+
+  if (noExiste) {
     return (
       <div>
         <h2>Usuario no encontrado</h2>
@@ -39,57 +111,7 @@ function AdminUsuarioForm() {
     )
   }
 
-  const cambiar = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  const validar = () => {
-    const nuevos = {}
-    const otros = obtenerUsuarios().filter((u) => !existente || u.id !== existente.id)
-    const runLimpio = form.run.replace(/[.\-\s]/g, '').toUpperCase()
-
-    if (!validarRun(form.run)) nuevos.run = 'RUN inválido (ej: 12345678-5)'
-    else if (otros.some((u) => u.run === runLimpio)) nuevos.run = 'El RUN ya está registrado'
-
-    if (!validarNombre(form.nombre)) nuevos.nombre = 'Ingresa el nombre'
-
-    if (!validarCorreo(form.correo)) nuevos.correo = 'Correo inválido'
-    else if (otros.some((u) => u.correo === form.correo.trim())) nuevos.correo = 'El correo ya está registrado'
-
-    const requierePassword = !existente || form.password !== ''
-    if (requierePassword && !validarPassword(form.password)) nuevos.password = 'Mínimo 8 caracteres'
-
-    return nuevos
-  }
-
-  const enviar = (e) => {
-    e.preventDefault()
-    setErrorGeneral('')
-    const nuevos = validar()
-    setErrores(nuevos)
-    if (Object.keys(nuevos).length > 0) return
-
-    const datos = {
-      run: form.run.replace(/[.\-\s]/g, '').toUpperCase(),
-      nombre: form.nombre.trim(),
-      correo: form.correo.trim(),
-      rol: form.rol,
-    }
-
-    try {
-      if (existente) {
-        if (form.password !== '') datos.password = form.password
-        actualizarUsuario(existente.id, datos)
-      } else {
-        crearUsuario({ ...datos, password: form.password })
-      }
-      navigate('/admin/usuarios')
-    } catch (err) {
-      setErrorGeneral(err.message)
-    }
-  }
-
-  const campo = (nombre, etiqueta, tipo = 'text', extra = {}) => (
+  const campo = (nombre, etiqueta, tipo = 'text') => (
     <div className="mb-3">
       <label className="form-label" htmlFor={nombre}>{etiqueta}</label>
       <input
@@ -99,7 +121,6 @@ function AdminUsuarioForm() {
         className={`form-control ${errores[nombre] ? 'is-invalid' : ''}`}
         value={form[nombre]}
         onChange={cambiar}
-        {...extra}
       />
       {errores[nombre] && <div className="invalid-feedback">{errores[nombre]}</div>}
     </div>
@@ -107,19 +128,14 @@ function AdminUsuarioForm() {
 
   return (
     <div style={{ maxWidth: '600px' }}>
-      <h1 className="mb-3">{existente ? 'Editar usuario' : 'Nuevo usuario'}</h1>
+      <h1 className="mb-3">{id ? 'Editar usuario' : 'Nuevo usuario'}</h1>
 
       {errorGeneral && <div className="alert alert-danger">{errorGeneral}</div>}
 
       <form onSubmit={enviar} noValidate>
-        {campo('run', 'RUN', 'text', { placeholder: '12345678-5' })}
         {campo('nombre', 'Nombre')}
         {campo('correo', 'Correo', 'email')}
-        {campo(
-          'password',
-          existente ? 'Contraseña (déjala vacía para no cambiarla)' : 'Contraseña',
-          'password'
-        )}
+        {campo('password', id ? 'Contraseña (déjala vacía para no cambiarla)' : 'Contraseña', 'password')}
 
         <div className="mb-3">
           <label className="form-label" htmlFor="rol">Rol</label>
@@ -131,13 +147,32 @@ function AdminUsuarioForm() {
             onChange={cambiar}
             disabled={esPropio}
           >
-            <option value="cliente">Cliente</option>
-            <option value="admin">Admin</option>
+            <option value="CLIENTE">Cliente</option>
+            <option value="VENDEDOR">Vendedor</option>
+            <option value="ADMINISTRADOR">Administrador</option>
           </select>
           {esPropio && <div className="form-text">No puedes cambiar tu propio rol.</div>}
         </div>
 
-        <button type="submit" className="btn btn-success me-2">Guardar</button>
+        {campo('direccion', 'Dirección (opcional)')}
+        {campo('telefono', 'Teléfono (opcional)')}
+
+        <div className="form-check mb-3">
+          <input
+            id="estado"
+            name="estado"
+            type="checkbox"
+            className="form-check-input"
+            checked={form.estado}
+            onChange={cambiar}
+            disabled={esPropio}
+          />
+          <label className="form-check-label" htmlFor="estado">Usuario activo</label>
+        </div>
+
+        <button type="submit" className="btn btn-success me-2" disabled={guardando}>
+          {guardando ? 'Guardando...' : 'Guardar'}
+        </button>
         <Link className="btn btn-outline-secondary" to="/admin/usuarios">Cancelar</Link>
       </form>
     </div>

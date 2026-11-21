@@ -5,6 +5,7 @@ import { useSesion } from '../../contexto/SesionContexto'
 const ENLACES = [
   { to: '/admin', etiqueta: 'Dashboard', end: true, roles: ['ADMINISTRADOR'] },
   { to: '/admin/productos', etiqueta: 'Productos', roles: ['ADMINISTRADOR', 'VENDEDOR'] },
+  { to: '/admin/categorias', etiqueta: 'Categorías', roles: ['ADMINISTRADOR'] },
   { to: '/admin/ordenes', etiqueta: 'Órdenes', roles: ['ADMINISTRADOR', 'VENDEDOR'] },
   { to: '/admin/lotes', etiqueta: 'Lotes de calidad', roles: ['ADMINISTRADOR'] },
   { to: '/admin/usuarios', etiqueta: 'Usuarios', roles: ['ADMINISTRADOR'] },
