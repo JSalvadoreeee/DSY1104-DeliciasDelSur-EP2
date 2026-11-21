@@ -7,10 +7,7 @@ const ENLACES = [
   { to: '/admin/productos', etiqueta: 'Productos', roles: ['ADMINISTRADOR', 'VENDEDOR'] },
   { to: '/admin/categorias', etiqueta: 'Categorías', roles: ['ADMINISTRADOR'] },
   { to: '/admin/ordenes', etiqueta: 'Órdenes', roles: ['ADMINISTRADOR', 'VENDEDOR'] },
-  { to: '/admin/lotes', etiqueta: 'Lotes de calidad', roles: ['ADMINISTRADOR'] },
   { to: '/admin/usuarios', etiqueta: 'Usuarios', roles: ['ADMINISTRADOR'] },
-  { to: '/admin/reportes', etiqueta: 'Reportes', roles: ['ADMINISTRADOR'] },
-  { to: '/admin/perfil', etiqueta: 'Perfil', roles: ['ADMINISTRADOR'] },
 ]
 
 function AdminLayout() {

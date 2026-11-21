@@ -28,13 +28,9 @@ import AdminProductoForm from './paginas/admin/AdminProductoForm'
 import AdminProductoDetalle from './paginas/admin/AdminProductoDetalle'
 import AdminOrdenes from './paginas/admin/AdminOrdenes'
 import AdminOrdenDetalle from './paginas/admin/AdminOrdenDetalle'
-import AdminLotes from './paginas/admin/AdminLotes'
-import AdminLoteForm from './paginas/admin/AdminLoteForm'
 import AdminCategorias from './paginas/admin/AdminCategorias'
 import AdminUsuarios from './paginas/admin/AdminUsuarios'
 import AdminUsuarioForm from './paginas/admin/AdminUsuarioForm'
-import AdminReportes from './paginas/admin/AdminReportes'
-import AdminPerfil from './paginas/admin/AdminPerfil'
 
 const PANEL = ['ADMINISTRADOR', 'VENDEDOR']
 const SOLO_ADMIN = ['ADMINISTRADOR']
@@ -76,15 +72,10 @@ function App() {
                 <Route element={<RutaAdmin roles={SOLO_ADMIN}><Outlet /></RutaAdmin>}>
                   <Route path="productos/nuevo" element={<AdminProductoForm />} />
                   <Route path="productos/editar/:id" element={<AdminProductoForm />} />
-                  <Route path="lotes" element={<AdminLotes />} />
-                  <Route path="lotes/nuevo" element={<AdminLoteForm />} />
-                  <Route path="lotes/editar/:id" element={<AdminLoteForm />} />
                   <Route path="categorias" element={<AdminCategorias />} />
                   <Route path="usuarios" element={<AdminUsuarios />} />
                   <Route path="usuarios/nuevo" element={<AdminUsuarioForm />} />
                   <Route path="usuarios/editar/:id" element={<AdminUsuarioForm />} />
-                  <Route path="reportes" element={<AdminReportes />} />
-                  <Route path="perfil" element={<AdminPerfil />} />
                 </Route>
               </Route>
             </Routes>
