@@ -25,6 +25,7 @@ import Ofertas from './paginas/tienda/Ofertas'
 import AdminLayout from './paginas/admin/AdminLayout'
 import AdminProductos from './paginas/admin/AdminProductos'
 import AdminProductoForm from './paginas/admin/AdminProductoForm'
+import AdminProductoDetalle from './paginas/admin/AdminProductoDetalle'
 import AdminOrdenes from './paginas/admin/AdminOrdenes'
 import AdminOrdenDetalle from './paginas/admin/AdminOrdenDetalle'
 import AdminLotes from './paginas/admin/AdminLotes'
@@ -66,6 +67,7 @@ function App() {
               <Route path="/admin" element={<RutaAdmin roles={PANEL}><AdminLayout /></RutaAdmin>}>
                 <Route index element={<InicioAdmin />} />
                 <Route path="productos" element={<AdminProductos />} />
+                <Route path="productos/:id" element={<AdminProductoDetalle />} />
                 <Route path="ordenes" element={<AdminOrdenes />} />
                 <Route path="ordenes/:id" element={<AdminOrdenDetalle />} />
 
