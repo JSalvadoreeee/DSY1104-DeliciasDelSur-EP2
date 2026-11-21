@@ -1,10 +1,11 @@
-// App principal: rutas de la tienda y del panel admin con sesión y carrito
-import { Routes, Route } from 'react-router-dom'
+// App principal: rutas de la tienda y del panel con sesión, roles y carrito
+import { Routes, Route, Outlet } from 'react-router-dom'
 import { SesionProvider } from './contexto/SesionContexto'
 import { CarritoProvider } from './contexto/CarritoContexto'
 import Navbar from './componentes/Navbar'
 import Footer from './componentes/Footer'
 import RutaAdmin from './componentes/RutaAdmin'
+import InicioAdmin from './componentes/InicioAdmin'
 import Home from './paginas/tienda/Home'
 import Productos from './paginas/tienda/Productos'
 import DetalleProducto from './paginas/tienda/DetalleProducto'
@@ -22,15 +23,19 @@ import Categorias from './paginas/tienda/Categorias'
 import Categoria from './paginas/tienda/Categoria'
 import Ofertas from './paginas/tienda/Ofertas'
 import AdminLayout from './paginas/admin/AdminLayout'
-import Dashboard from './paginas/admin/Dashboard'
 import AdminProductos from './paginas/admin/AdminProductos'
 import AdminProductoForm from './paginas/admin/AdminProductoForm'
+import AdminOrdenes from './paginas/admin/AdminOrdenes'
+import AdminOrdenDetalle from './paginas/admin/AdminOrdenDetalle'
 import AdminLotes from './paginas/admin/AdminLotes'
 import AdminLoteForm from './paginas/admin/AdminLoteForm'
 import AdminUsuarios from './paginas/admin/AdminUsuarios'
 import AdminUsuarioForm from './paginas/admin/AdminUsuarioForm'
 import AdminReportes from './paginas/admin/AdminReportes'
 import AdminPerfil from './paginas/admin/AdminPerfil'
+
+const PANEL = ['ADMINISTRADOR', 'VENDEDOR']
+const SOLO_ADMIN = ['ADMINISTRADOR']
 
 function App() {
   return (
@@ -58,19 +63,24 @@ function App() {
               <Route path="/categoria/:nombre" element={<Categoria />} />
               <Route path="/ofertas" element={<Ofertas />} />
 
-              <Route path="/admin" element={<RutaAdmin><AdminLayout /></RutaAdmin>}>
-                <Route index element={<Dashboard />} />
+              <Route path="/admin" element={<RutaAdmin roles={PANEL}><AdminLayout /></RutaAdmin>}>
+                <Route index element={<InicioAdmin />} />
                 <Route path="productos" element={<AdminProductos />} />
-                <Route path="productos/nuevo" element={<AdminProductoForm />} />
-                <Route path="productos/editar/:id" element={<AdminProductoForm />} />
-                <Route path="lotes" element={<AdminLotes />} />
-                <Route path="lotes/nuevo" element={<AdminLoteForm />} />
-                <Route path="lotes/editar/:id" element={<AdminLoteForm />} />
-                <Route path="usuarios" element={<AdminUsuarios />} />
-                <Route path="usuarios/nuevo" element={<AdminUsuarioForm />} />
-                <Route path="usuarios/editar/:id" element={<AdminUsuarioForm />} />
-                <Route path="reportes" element={<AdminReportes />} />
-                <Route path="perfil" element={<AdminPerfil />} />
+                <Route path="ordenes" element={<AdminOrdenes />} />
+                <Route path="ordenes/:id" element={<AdminOrdenDetalle />} />
+
+                <Route element={<RutaAdmin roles={SOLO_ADMIN}><Outlet /></RutaAdmin>}>
+                  <Route path="productos/nuevo" element={<AdminProductoForm />} />
+                  <Route path="productos/editar/:id" element={<AdminProductoForm />} />
+                  <Route path="lotes" element={<AdminLotes />} />
+                  <Route path="lotes/nuevo" element={<AdminLoteForm />} />
+                  <Route path="lotes/editar/:id" element={<AdminLoteForm />} />
+                  <Route path="usuarios" element={<AdminUsuarios />} />
+                  <Route path="usuarios/nuevo" element={<AdminUsuarioForm />} />
+                  <Route path="usuarios/editar/:id" element={<AdminUsuarioForm />} />
+                  <Route path="reportes" element={<AdminReportes />} />
+                  <Route path="perfil" element={<AdminPerfil />} />
+                </Route>
               </Route>
             </Routes>
           </main>

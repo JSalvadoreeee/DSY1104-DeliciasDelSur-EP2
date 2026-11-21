@@ -1,21 +1,26 @@
-
+// Menú lateral del panel: cada enlace indica qué roles lo pueden ver
 import { NavLink, Outlet } from 'react-router-dom'
+import { useSesion } from '../../contexto/SesionContexto'
 
 const ENLACES = [
-  { to: '/admin', etiqueta: 'Dashboard', end: true },
-  { to: '/admin/productos', etiqueta: 'Productos' },
-  { to: '/admin/lotes', etiqueta: 'Lotes de calidad' },
-  { to: '/admin/usuarios', etiqueta: 'Usuarios' },
-  { to: '/admin/reportes', etiqueta: 'Reportes' },
-  { to: '/admin/perfil', etiqueta: 'Perfil' },
+  { to: '/admin', etiqueta: 'Dashboard', end: true, roles: ['ADMINISTRADOR'] },
+  { to: '/admin/productos', etiqueta: 'Productos', roles: ['ADMINISTRADOR', 'VENDEDOR'] },
+  { to: '/admin/ordenes', etiqueta: 'Órdenes', roles: ['ADMINISTRADOR', 'VENDEDOR'] },
+  { to: '/admin/lotes', etiqueta: 'Lotes de calidad', roles: ['ADMINISTRADOR'] },
+  { to: '/admin/usuarios', etiqueta: 'Usuarios', roles: ['ADMINISTRADOR'] },
+  { to: '/admin/reportes', etiqueta: 'Reportes', roles: ['ADMINISTRADOR'] },
+  { to: '/admin/perfil', etiqueta: 'Perfil', roles: ['ADMINISTRADOR'] },
 ]
 
 function AdminLayout() {
+  const { usuario } = useSesion()
+  const visibles = ENLACES.filter((e) => e.roles.includes(usuario?.rol))
+
   return (
     <div className="row g-4">
       <aside className="col-md-3 col-lg-2">
         <div className="list-group">
-          {ENLACES.map((e) => (
+          {visibles.map((e) => (
             <NavLink
               key={e.to}
               to={e.to}

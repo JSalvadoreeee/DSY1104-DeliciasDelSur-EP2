@@ -1,4 +1,3 @@
-
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useCarrito } from '../contexto/CarritoContexto'
 import { useSesion } from '../contexto/SesionContexto'
@@ -12,6 +11,9 @@ function Navbar() {
     cerrarSesion()
     navigate('/')
   }
+
+  const esAdmin = usuario?.rol === 'ADMINISTRADOR'
+  const esVendedor = usuario?.rol === 'VENDEDOR'
 
   return (
     <nav className="navbar navbar-expand-lg bg-light border-bottom">
@@ -38,8 +40,12 @@ function Navbar() {
             <li className="nav-item"><NavLink className="nav-link" to="/nosotros">Nosotros</NavLink></li>
             <li className="nav-item"><NavLink className="nav-link" to="/blogs">Blogs</NavLink></li>
             <li className="nav-item"><NavLink className="nav-link" to="/contacto">Contacto</NavLink></li>
-            {usuario?.rol === 'admin' && (
-              <li className="nav-item"><NavLink className="nav-link" to="/admin">Panel admin</NavLink></li>
+            {(esAdmin || esVendedor) && (
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/admin">
+                  {esAdmin ? 'Panel admin' : 'Panel vendedor'}
+                </NavLink>
+              </li>
             )}
           </ul>
 
