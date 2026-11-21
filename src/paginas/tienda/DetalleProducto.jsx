@@ -3,10 +3,13 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { productosServicio } from '../../servicios/productosServicio'
 import { useCarrito } from '../../contexto/CarritoContexto'
+import { useSesion } from '../../contexto/SesionContexto'
 
 export default function DetalleProducto() {
   const { id } = useParams()
   const { agregarAlCarrito } = useCarrito()
+  const { usuario } = useSesion()
+  const puedeComprar = usuario?.rol !== 'VENDEDOR'
   const [producto, setProducto] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -83,13 +86,15 @@ export default function DetalleProducto() {
             </ul>
 
             <div className="d-flex gap-2 mt-4">
-              <button
-                onClick={() => agregarAlCarrito(producto)}
-                className="btn btn-warning btn-lg fw-semibold flex-grow-1"
-                disabled={producto.stock === 0}
-              >
-                {producto.stock === 0 ? 'Sin stock' : 'Añadir al Carrito'}
-              </button>
+              {puedeComprar && (
+                <button
+                  onClick={() => agregarAlCarrito(producto)}
+                  className="btn btn-warning btn-lg fw-semibold flex-grow-1"
+                  disabled={producto.stock === 0}
+                >
+                  {producto.stock === 0 ? 'Sin stock' : 'Añadir al Carrito'}
+                </button>
+              )}
               <Link to="/productos" className="btn btn-outline-secondary btn-lg">
                 Volver
               </Link>

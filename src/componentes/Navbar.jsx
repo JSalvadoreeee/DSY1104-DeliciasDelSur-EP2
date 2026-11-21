@@ -3,17 +3,19 @@ import { useCarrito } from '../contexto/CarritoContexto'
 import { useSesion } from '../contexto/SesionContexto'
 
 function Navbar() {
-  const { cantidadTotal, total } = useCarrito()
+  const { cantidadTotal, total, limpiarCarrito } = useCarrito()
   const { usuario, cerrarSesion } = useSesion()
   const navigate = useNavigate()
 
   const salir = () => {
     cerrarSesion()
+    limpiarCarrito()
     navigate('/')
   }
 
   const esAdmin = usuario?.rol === 'ADMINISTRADOR'
   const esVendedor = usuario?.rol === 'VENDEDOR'
+  const puedeComprar = !esVendedor
 
   return (
     <nav className="navbar navbar-expand-lg bg-light border-bottom">
@@ -63,9 +65,11 @@ function Navbar() {
                 <NavLink className="btn btn-primary btn-sm" to="/registro">Crear cuenta</NavLink>
               </>
             )}
-            <NavLink className="btn btn-success btn-sm" to="/carrito">
-              Carrito ({cantidadTotal}) - ${total.toLocaleString('es-CL')}
-            </NavLink>
+            {puedeComprar && (
+              <NavLink className="btn btn-success btn-sm" to="/carrito">
+                Carrito ({cantidadTotal}) - ${total.toLocaleString('es-CL')}
+              </NavLink>
+            )}
           </div>
         </div>
       </div>

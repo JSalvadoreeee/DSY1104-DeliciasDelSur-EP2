@@ -3,10 +3,13 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCatalogo } from '../../utilidades/useCatalogo'
 import { useCarrito } from '../../contexto/CarritoContexto'
+import { useSesion } from '../../contexto/SesionContexto'
 
 export default function Productos() {
   const { productos, categorias, cargando, error } = useCatalogo()
   const { agregarAlCarrito } = useCarrito()
+  const { usuario } = useSesion()
+  const puedeComprar = usuario?.rol !== 'VENDEDOR'
 
   const [busqueda, setBusqueda] = useState('')
   const [categoriaSel, setCategoriaSel] = useState('Todas')
@@ -89,13 +92,15 @@ export default function Productos() {
                   <Link to={`/producto/${prod.id}`} className="btn btn-outline-danger fw-semibold">
                     Ver Detalle
                   </Link>
-                  <button
-                    onClick={() => agregarAlCarrito(prod)}
-                    className="btn btn-warning fw-semibold"
-                    disabled={prod.stock === 0}
-                  >
-                    {prod.stock === 0 ? 'Sin stock' : 'Añadir al Carrito'}
-                  </button>
+                  {puedeComprar && (
+                    <button
+                      onClick={() => agregarAlCarrito(prod)}
+                      className="btn btn-warning fw-semibold"
+                      disabled={prod.stock === 0}
+                    >
+                      {prod.stock === 0 ? 'Sin stock' : 'Añadir al Carrito'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

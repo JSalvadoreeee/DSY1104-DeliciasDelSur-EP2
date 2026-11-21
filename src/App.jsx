@@ -37,6 +37,7 @@ import AdminPerfil from './paginas/admin/AdminPerfil'
 
 const PANEL = ['ADMINISTRADOR', 'VENDEDOR']
 const SOLO_ADMIN = ['ADMINISTRADOR']
+const COMPRAN = ['CLIENTE', 'ADMINISTRADOR']
 
 function App() {
   return (
@@ -51,7 +52,7 @@ function App() {
               <Route path="/productos" element={<Productos />} />
               <Route path="/producto/:id" element={<DetalleProducto />} />
               <Route path="/carrito" element={<Carrito />} />
-              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/checkout" element={<RutaAdmin roles={COMPRAN}><Checkout /></RutaAdmin>} />
               <Route path="/pago-exitoso" element={<PagoExitoso />} />
               <Route path="/pago-error" element={<PagoError />} />
               <Route path="/registro" element={<Registro />} />
