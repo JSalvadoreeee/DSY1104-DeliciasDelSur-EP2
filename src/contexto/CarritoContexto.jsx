@@ -6,15 +6,24 @@ const CLAVE = 'dds_carrito'
 
 export const useCarrito = () => useContext(CarritoContexto)
 
+function sanitizarTexto(valor) {
+  return String(valor ?? '').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ\s.,\-()/]/g, '')
+}
+
+function sanitizarUrl(valor) {
+  return String(valor ?? '').replace(/[^a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]/g, '')
+}
+
 function sanitizarItem(item) {
+  const precio = Number(item.precio) || 0
   return {
-    id: Number(item.id),
-    nombre: String(item.nombre ?? ''),
-    precio: Number(item.precio) || 0,
-    precioFinal: item.precioFinal != null ? Number(item.precioFinal) : Number(item.precio) || 0,
+    id: Number(item.id) || 0,
+    nombre: sanitizarTexto(item.nombre),
+    precio,
+    precioFinal: item.precioFinal != null ? Number(item.precioFinal) || 0 : precio,
     oferta: Number(item.oferta) || 0,
-    imagen: String(item.imagen ?? ''),
-    imagenUrl: String(item.imagenUrl ?? ''),
+    imagen: sanitizarUrl(item.imagen),
+    imagenUrl: sanitizarUrl(item.imagenUrl),
     stock: Number(item.stock) || 0,
     cantidad: Math.max(1, Number(item.cantidad) || 1),
   }
@@ -36,8 +45,18 @@ export function CarritoProvider({ children }) {
 
   useEffect(() => {
     try {
-      const seguro = carrito.map(sanitizarItem)
-      localStorage.setItem(CLAVE, JSON.stringify(seguro))
+      const limpio = carrito.map((item) => ({
+        id: Number(item.id) || 0,
+        nombre: sanitizarTexto(item.nombre),
+        precio: Number(item.precio) || 0,
+        precioFinal: item.precioFinal != null ? Number(item.precioFinal) || 0 : Number(item.precio) || 0,
+        oferta: Number(item.oferta) || 0,
+        imagen: sanitizarUrl(item.imagen),
+        imagenUrl: sanitizarUrl(item.imagenUrl),
+        stock: Number(item.stock) || 0,
+        cantidad: Math.max(1, Number(item.cantidad) || 1),
+      }))
+      localStorage.setItem(CLAVE, JSON.stringify(limpio))
     } catch {
       // sin almacenamiento disponible, el carrito solo dura la sesión
     }
