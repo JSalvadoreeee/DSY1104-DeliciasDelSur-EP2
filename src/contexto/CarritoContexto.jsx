@@ -1,96 +1,125 @@
-// Carrito global: usa el precio con oferta, respeta el stock y se guarda al recargar la página
-import { createContext, useContext, useEffect, useState } from 'react'
+// Carrito global: usa el precio con oferta, respeta el stock y persiste solo IDs y cantidades
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { productosServicio } from '../servicios/productosServicio'
 
 const CarritoContexto = createContext()
 const CLAVE = 'dds_carrito'
 
 export const useCarrito = () => useContext(CarritoContexto)
 
-function sanitizarTexto(valor) {
-  return String(valor ?? '').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ\s.,\-()/]/g, '')
-}
-
-function sanitizarUrl(valor) {
-  return String(valor ?? '').replace(/[^a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]/g, '')
-}
-
-function sanitizarItem(item) {
-  const precio = Number(item.precio) || 0
-  return {
-    id: Number(item.id) || 0,
-    nombre: sanitizarTexto(item.nombre),
-    precio,
-    precioFinal: item.precioFinal != null ? Number(item.precioFinal) || 0 : precio,
-    oferta: Number(item.oferta) || 0,
-    imagen: sanitizarUrl(item.imagen),
-    imagenUrl: sanitizarUrl(item.imagenUrl),
-    stock: Number(item.stock) || 0,
-    cantidad: Math.max(1, Number(item.cantidad) || 1),
-  }
-}
-
 function leerCarrito() {
   try {
     const guardado = localStorage.getItem(CLAVE)
     if (!guardado) return []
     const parsed = JSON.parse(guardado)
-    return Array.isArray(parsed) ? parsed.map(sanitizarItem) : []
+    if (!Array.isArray(parsed)) return []
+    return parsed
+      .map((item) => ({
+        id: Number(item.id) || 0,
+        cantidad: Math.max(1, Number(item.cantidad) || 1),
+      }))
+      .filter((item) => item.id > 0)
   } catch {
     return []
   }
+}
+
+function hidratarItem(item, catalogo) {
+  const prod = catalogo.find((p) => p.id === item.id)
+  if (!prod || prod.stock < 1) return null
+  return {
+    ...prod,
+    cantidad: Math.min(item.cantidad, prod.stock),
+  }
+}
+
+function hidratarLista(prev, catalogo) {
+  return prev.map((item) => hidratarItem(item, catalogo)).filter(Boolean)
 }
 
 export function CarritoProvider({ children }) {
   const [carrito, setCarrito] = useState(leerCarrito)
 
   useEffect(() => {
+    const pendientes = leerCarrito()
+    if (pendientes.length === 0) return
+
+    const cargarCatalogo = async () => {
+      try {
+        const catalogo = await productosServicio.listar()
+        setCarrito((prev) => hidratarLista(prev, catalogo))
+      } catch {
+        // Sin conexión al recargar, el carrito queda vacío hasta que responda la API
+      }
+    }
+    void cargarCatalogo()
+  }, [])
+
+  useEffect(() => {
     try {
-      const limpio = carrito.map((item) => ({
+      const resumen = carrito.map((item) => ({
         id: Number(item.id) || 0,
-        nombre: sanitizarTexto(item.nombre),
-        precio: Number(item.precio) || 0,
-        precioFinal: item.precioFinal != null ? Number(item.precioFinal) || 0 : Number(item.precio) || 0,
-        oferta: Number(item.oferta) || 0,
-        imagen: sanitizarUrl(item.imagen),
-        imagenUrl: sanitizarUrl(item.imagenUrl),
-        stock: Number(item.stock) || 0,
         cantidad: Math.max(1, Number(item.cantidad) || 1),
       }))
-      localStorage.setItem(CLAVE, JSON.stringify(limpio))
+      localStorage.setItem(CLAVE, JSON.stringify(resumen))
     } catch {
       // sin almacenamiento disponible, el carrito solo dura la sesión
     }
   }, [carrito])
 
-  const agregarAlCarrito = (producto) => {
-    const limpio = sanitizarItem(producto)
+  const agregarAlCarrito = useCallback((producto) => {
     setCarrito((prev) => {
-      const existe = prev.find((item) => item.id === limpio.id)
+      const existe = prev.find((item) => item.id === producto.id)
       if (existe) {
-        if (existe.cantidad >= limpio.stock) return prev
+        if (existe.cantidad >= producto.stock) return prev
         return prev.map((item) =>
-          item.id === limpio.id ? { ...item, cantidad: item.cantidad + 1 } : item
+          item.id === producto.id ? { ...item, cantidad: item.cantidad + 1 } : item
         )
       }
-      if (limpio.stock < 1) return prev
-      return [...prev, { ...limpio, cantidad: 1 }]
+      if (producto.stock < 1) return prev
+      return [...prev, { ...producto, cantidad: 1 }]
     })
-  }
+  }, [])
 
-  const eliminarDelCarrito = (id) => {
+  const eliminarDelCarrito = useCallback((id) => {
     setCarrito((prev) => prev.filter((item) => item.id !== id))
-  }
+  }, [])
 
-  const limpiarCarrito = () => setCarrito([])
+  const limpiarCarrito = useCallback(() => setCarrito([]), [])
 
-  const total = carrito.reduce((acc, item) => acc + (item.precioFinal ?? item.precio) * item.cantidad, 0)
+  const carritoActivo = useMemo(
+    () => carrito.filter((item) => Boolean(item.nombre)),
+    [carrito]
+  )
 
-  const cantidadTotal = carrito.reduce((acc, item) => acc + item.cantidad, 0)
+  const total = useMemo(
+    () =>
+      carritoActivo.reduce(
+        (acc, item) => acc + (Number(item.precioFinal ?? item.precio) || 0) * item.cantidad,
+        0
+      ),
+    [carritoActivo]
+  )
+
+  const cantidadTotal = useMemo(
+    () => carritoActivo.reduce((acc, item) => acc + item.cantidad, 0),
+    [carritoActivo]
+  )
+
+  const valor = useMemo(
+    () => ({
+      carrito: carritoActivo,
+      agregarAlCarrito,
+      eliminarDelCarrito,
+      limpiarCarrito,
+      total,
+      cantidadTotal,
+    }),
+    [carritoActivo, agregarAlCarrito, eliminarDelCarrito, limpiarCarrito, total, cantidadTotal]
+  )
 
   return (
-    <CarritoContexto.Provider
-      value={{ carrito, agregarAlCarrito, eliminarDelCarrito, limpiarCarrito, total, cantidadTotal }}
-    >
+    <CarritoContexto.Provider value={valor}>
       {children}
     </CarritoContexto.Provider>
   )
