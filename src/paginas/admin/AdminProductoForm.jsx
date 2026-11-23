@@ -54,7 +54,7 @@ function AdminProductoForm() {
         setCargando(false)
       }
     }
-    cargar()
+    void cargar()
   }, [id])
 
   const cambiar = (e) => {

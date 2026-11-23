@@ -1,10 +1,9 @@
 // Sesión global: guarda el token JWT y los datos públicos del usuario, y los mantiene al recargar
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { autenticacionServicio } from '../servicios/autenticacionServicio'
-import { CLAVE_TOKEN, mensajeError } from '../servicios/api'
+import { CLAVE_SESION, CLAVE_TOKEN, EVENTO_SESION_EXPIRADA, mensajeError } from '../servicios/api'
 
 const SesionContexto = createContext(null)
-const CLAVE = 'dds_sesion'
 const ROLES = ['ADMINISTRADOR', 'VENDEDOR', 'CLIENTE']
 
 function datosSesion(u) {
@@ -18,7 +17,7 @@ function datosSesion(u) {
 
 function leerSesion() {
   try {
-    const guardado = localStorage.getItem(CLAVE)
+    const guardado = localStorage.getItem(CLAVE_SESION)
     const token = localStorage.getItem(CLAVE_TOKEN)
     return guardado && token ? datosSesion(JSON.parse(guardado)) : null
   } catch {
@@ -34,10 +33,22 @@ function textoError(error, porDefecto) {
 export function SesionProvider({ children }) {
   const [usuario, setUsuario] = useState(leerSesion)
 
+  const cerrarSesion = () => {
+    localStorage.removeItem(CLAVE_SESION)
+    localStorage.removeItem(CLAVE_TOKEN)
+    setUsuario(null)
+  }
+
+  useEffect(() => {
+    const manejarExpiracion = () => cerrarSesion()
+    window.addEventListener(EVENTO_SESION_EXPIRADA, manejarExpiracion)
+    return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, manejarExpiracion)
+  }, [])
+
   const abrirSesion = (respuesta) => {
     const sesion = datosSesion(respuesta)
     localStorage.setItem(CLAVE_TOKEN, respuesta.token)
-    localStorage.setItem(CLAVE, JSON.stringify(sesion))
+    localStorage.setItem(CLAVE_SESION, JSON.stringify(sesion))
     setUsuario(sesion)
     return sesion
   }
@@ -58,12 +69,6 @@ export function SesionProvider({ children }) {
     } catch (error) {
       throw new Error(textoError(error, 'No se pudo crear la cuenta'))
     }
-  }
-
-  const cerrarSesion = () => {
-    localStorage.removeItem(CLAVE)
-    localStorage.removeItem(CLAVE_TOKEN)
-    setUsuario(null)
   }
 
   return (

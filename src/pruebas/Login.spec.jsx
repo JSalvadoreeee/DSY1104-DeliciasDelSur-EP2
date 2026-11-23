@@ -1,8 +1,10 @@
-// Pruebas del componente Login: validaciones, mensaje de error y uso de un espía (mock) sobre localStorage
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+// Pruebas del componente Login: validaciones, mensaje de error y guardado de sesión JWT
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Login from '../paginas/tienda/Login'
 import { SesionProvider } from '../contexto/SesionContexto'
+import { autenticacionServicio } from '../servicios/autenticacionServicio'
+import { CLAVE_SESION, CLAVE_TOKEN } from '../servicios/api'
 
 function montar() {
   return render(
@@ -21,9 +23,15 @@ function escribir(correo, password) {
 }
 
 describe('Componente Login', () => {
+  beforeEach(() => {
+    localStorage.removeItem(CLAVE_SESION)
+    localStorage.removeItem(CLAVE_TOKEN)
+  })
+
   afterEach(() => {
     cleanup()
-    localStorage.removeItem('dds_sesion')
+    localStorage.removeItem(CLAVE_SESION)
+    localStorage.removeItem(CLAVE_TOKEN)
   })
 
   it('muestra errores de validación si se envía el formulario vacío', () => {
@@ -33,16 +41,36 @@ describe('Componente Login', () => {
     expect(screen.getByText('Mínimo 8 caracteres')).not.toBeNull()
   })
 
-  it('muestra un aviso si las credenciales son incorrectas', () => {
+  it('muestra un aviso si las credenciales son incorrectas', async () => {
+    spyOn(autenticacionServicio, 'login').and.rejectWith({
+      response: { data: { mensaje: 'Correo o contraseña incorrectos' } },
+    })
+
     montar()
     escribir('admin@deliciasdelsur.cl', 'clave-equivocada')
-    expect(screen.getByText('Correo o contraseña incorrectos')).not.toBeNull()
+
+    const alerta = await screen.findByText('Correo o contraseña incorrectos')
+    expect(alerta).not.toBeNull()
   })
 
-  it('guarda la sesión usando un espía sobre localStorage al entrar como admin', () => {
+  it('guarda el token y la sesión en localStorage al entrar como admin', async () => {
+    spyOn(autenticacionServicio, 'login').and.resolveTo({
+      token: 'jwt-token-admin',
+      id: 1,
+      nombre: 'Administrador Delicias',
+      correo: 'admin@deliciasdelsur.cl',
+      rol: 'ADMINISTRADOR',
+    })
     const espia = spyOn(Storage.prototype, 'setItem').and.callThrough()
+
     montar()
-    escribir('admin@deliciasdelsur.cl', 'admin1234')
-    expect(espia).toHaveBeenCalledWith('dds_sesion', jasmine.any(String))
+    escribir('admin@deliciasdelsur.cl', 'admin123')
+
+    await waitFor(() => {
+      if (!localStorage.getItem(CLAVE_SESION)) throw new Error('Esperando sesión')
+    })
+
+    expect(espia).toHaveBeenCalledWith(CLAVE_TOKEN, 'jwt-token-admin')
+    expect(espia).toHaveBeenCalledWith(CLAVE_SESION, jasmine.any(String))
   })
 })

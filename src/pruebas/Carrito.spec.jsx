@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import Carrito from '../paginas/tienda/Carrito'
 import { CarritoProvider, useCarrito } from '../contexto/CarritoContexto'
 
-const producto = { id: 1, codigo: 'PR001', nombre: 'Mermelada de Frutilla', precio: 2500 }
+const producto = { id: 1, nombre: 'Mermelada de Frutilla', precio: 2500, stock: 10 }
 
 function Sembrador() {
   const { agregarAlCarrito } = useCarrito()
@@ -23,7 +23,14 @@ function montar() {
 }
 
 describe('Componente Carrito', () => {
-  afterEach(cleanup)
+  beforeEach(() => {
+    localStorage.removeItem('dds_carrito')
+  })
+
+  afterEach(() => {
+    cleanup()
+    localStorage.removeItem('dds_carrito')
+  })
 
   it('muestra el mensaje de carrito vacío cuando no hay productos', () => {
     montar()
