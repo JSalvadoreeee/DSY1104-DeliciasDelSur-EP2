@@ -2,13 +2,16 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { productosServicio } from '../../servicios/productosServicio'
+import { useAviso } from '../../utilidades/useAviso'
 import { useCarrito } from '../../contexto/CarritoContexto'
 import { useSesion } from '../../contexto/SesionContexto'
+import Aviso from '../../componentes/Aviso'
 
 export default function DetalleProducto() {
   const { id } = useParams()
-  const { agregarAlCarrito } = useCarrito()
+  const { agregarAlCarrito, carrito } = useCarrito()
   const { usuario } = useSesion()
+  const { aviso, mostrar } = useAviso()
   const puedeComprar = usuario?.rol !== 'VENDEDOR'
   const [producto, setProducto] = useState(null)
   const [cargando, setCargando] = useState(true)
@@ -31,6 +34,16 @@ export default function DetalleProducto() {
       .finally(() => setCargando(false))
   }, [id])
 
+  const agregar = () => {
+    const enCarrito = (carrito ?? []).find((item) => item.id === producto.id)?.cantidad ?? 0
+    if (enCarrito >= producto.stock) {
+      mostrar(`Ya tienes todo el stock disponible de ${producto.nombre} en tu carrito`, 'warning')
+      return
+    }
+    agregarAlCarrito(producto)
+    mostrar(`${producto.nombre} se añadió al carrito`)
+  }
+
   if (cargando) return <p className="text-center py-5">Cargando producto...</p>
 
   if (error) return <div className="alert alert-danger my-5">{error}</div>
@@ -47,6 +60,7 @@ export default function DetalleProducto() {
 
   return (
     <div className="container my-5" style={{ maxWidth: '850px' }}>
+      <Aviso aviso={aviso} />
       <div className="card border-0 shadow-sm p-4">
         <div className="row g-4 align-items-center">
           <div className="col-md-6">
@@ -88,7 +102,7 @@ export default function DetalleProducto() {
             <div className="d-flex gap-2 mt-4">
               {puedeComprar && (
                 <button
-                  onClick={() => agregarAlCarrito(producto)}
+                  onClick={agregar}
                   className="btn btn-warning btn-lg fw-semibold flex-grow-1"
                   disabled={producto.stock === 0}
                 >

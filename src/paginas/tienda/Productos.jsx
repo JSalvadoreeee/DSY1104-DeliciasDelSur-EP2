@@ -2,17 +2,30 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCatalogo } from '../../utilidades/useCatalogo'
+import { useAviso } from '../../utilidades/useAviso'
 import { useCarrito } from '../../contexto/CarritoContexto'
 import { useSesion } from '../../contexto/SesionContexto'
+import Aviso from '../../componentes/Aviso'
 
 export default function Productos() {
   const { productos, categorias, cargando, error } = useCatalogo()
-  const { agregarAlCarrito } = useCarrito()
+  const { agregarAlCarrito, carrito } = useCarrito()
   const { usuario } = useSesion()
+  const { aviso, mostrar } = useAviso()
   const puedeComprar = usuario?.rol !== 'VENDEDOR'
 
   const [busqueda, setBusqueda] = useState('')
   const [categoriaSel, setCategoriaSel] = useState('Todas')
+
+  const agregar = (prod) => {
+    const enCarrito = (carrito ?? []).find((item) => item.id === prod.id)?.cantidad ?? 0
+    if (enCarrito >= prod.stock) {
+      mostrar(`Ya tienes todo el stock disponible de ${prod.nombre} en tu carrito`, 'warning')
+      return
+    }
+    agregarAlCarrito(prod)
+    mostrar(`${prod.nombre} se añadió al carrito`)
+  }
 
   const productosFiltrados = productos.filter((prod) => {
     const texto = busqueda.toLowerCase()
@@ -24,6 +37,7 @@ export default function Productos() {
 
   return (
     <div className="container mt-4 mb-5">
+      <Aviso aviso={aviso} />
       <h2 className="mb-4 text-center text-danger fw-bold">Catálogo de Alimentos Procesados</h2>
 
       <div className="row g-3 mb-4">
@@ -94,7 +108,7 @@ export default function Productos() {
                   </Link>
                   {puedeComprar && (
                     <button
-                      onClick={() => agregarAlCarrito(prod)}
+                      onClick={() => agregar(prod)}
                       className="btn btn-warning fw-semibold"
                       disabled={prod.stock === 0}
                     >
